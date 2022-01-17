@@ -1,0 +1,29 @@
+pipeline {
+    agent { label 'master' }
+    environment {
+        PYMIN_LOC = '/var/www/pymin/'
+        PYMIN_SRC = "${WORKSPACE}/pymin/"
+    }
+    stages {
+        stage('CleanUp') {
+            steps {
+                sh label: 'Cleaning var/www...', script: "sudo rm -rf ${PYMIN_LOC}"
+            }
+        }
+        stage('Copy Python Files') {
+            steps {
+                copyArtifacts filter: '**/*', projectName: 'MagnusColes', selector: lastSuccessful(), target: "${PYMIN_SRC}"
+                sh label: 'Copying...', script: "sudo cp -f -R ${PYMIN_SRC}/pymin ${PYMIN_LOC}"
+                withCredentials([string(credentialsId: 'python-secret', variable: 'SECRET')]) { //set SECRET with the credential content
+                    sh label: 'Copying secrets...', script: "echo \"${SECRET}\" | sudo tee -a ${PYMIN_LOC}/.env"
+                }
+            }
+        }
+        stage('Reload Apache') {
+            steps {
+                sh label: 'Reloading Apache...', script: 'sudo systemctl reload apache2'
+                echo 'DONE'
+            }
+        }
+    }
+}
