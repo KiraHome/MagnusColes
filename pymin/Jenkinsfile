@@ -14,7 +14,9 @@ pipeline {
             steps {
                 copyArtifacts filter: '**/*', projectName: 'MagnusColes', selector: lastSuccessful(), target: "${PYMIN_SRC}"
                 sh label: 'Copying...', script: "sudo cp -f -R ${PYMIN_SRC}/pymin ${PYMIN_LOC}"
-                sh label: 'Copying secrets...', script: "echo \"PSQL_USER_NAME = 'pymin'\nPSQL_PASSWORD = 'leAatherf4ace!'\nPSQL_HOST = 'localhost'\nPSQL_DB_NAME = 'pymin'\nSECRET_KEY = '2E3C547F114EA65DCE7C8F54768C66A611B160EC372B628054889AA9556D8986'\nSESSION_COOKIE_NAME = 'aisjfdoaisjdfpiasjdfp'\" | sudo tee -a ${PYMIN_LOC}/.env"
+                withCredentials([string(credentialsId: 'python-secret', variable: 'SECRET')]) { //set SECRET with the credential content
+                    sh label: 'Copying secrets...', script: "echo \"${SECRET}\" | sudo tee -a ${PYMIN_LOC}/.env"
+                }
             }
         }
         stage('Reload Apache') {
