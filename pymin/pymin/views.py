@@ -44,6 +44,7 @@ def login():
          next_page = request.args.get('next')
          if not next_page or url_parse(next_page).netloc != '':
              next_page = url_for('views.index')
+             flash('You have been logged in successfully!')
          return redirect(next_page)
     return render_template('login.html')
 
@@ -51,6 +52,7 @@ def login():
 @bp.route('/logout')
 def logout():
     logout_user()
+    flash('Successful logout.')
     return redirect(url_for('views.index'))
 
 
