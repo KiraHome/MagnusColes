@@ -1,0 +1,17 @@
+<nav class="navbar fixed-top navbar-expand-lg navbar-dark bg-dark">
+	<div class="container">
+		<a href="#" class="navbar-brand">kutyaszar</a>
+		<button type="button" class="navbar-toggler" data-bs-toggle="collapse" data-bs-target="#navbarCollapse">
+			<span class="navbar-toggler-icon"></span>
+		</button>
+		<div class="collapse navbar-collapse" id="navbarCollapse">
+			<div class="navbar-nav ms-auto">
+				{% if current_user.is_anonymous %}
+				<a href="{{ url_for('views.login') }}" class="nav-item nav-link">Login</a>
+				{% else %}
+				<a class="nav-item nav-link">{{ current_user.username }}</a><a href="{{ url_for('views.logout') }}" class="nav-item nav-link">Logout</a>
+				{% endif %}
+			</div>
+		</div>
+	</div>
+</nav>
