@@ -1,0 +1,27 @@
+pipeline {
+    agent { label 'master' }
+    environment {
+        PYMIN_LOC = '/var/www/pymin/'
+        PYMIN_SRC = "${WORKSPACE}/pymin/"
+    }
+    stages {
+        stage('CleanUp') {
+            steps {
+                sh label: 'Cleaning var/www...', script: "sudo rm -rf ${PYMIN_LOC}"
+            }
+        }
+        stage('Copy Python Files') {
+            steps {
+                copyArtifacts filter: '**/*', projectName: 'MagnusColes', selector: lastSuccessful(), target: "${PYMIN_SRC}"
+                sh label: 'Copying...', script: "sudo cp -f -R ${PYMIN_SRC}/pymin ${PYMIN_LOC}"
+                sh label: 'Copying secrets...', script: "echo \"PSQL_USER_NAME = 'pymin'\nPSQL_PASSWORD = 'leAatherf4ace!'\nPSQL_HOST = 'localhost'\nPSQL_DB_NAME = 'pymin'\nSECRET_KEY = '2E3C547F114EA65DCE7C8F54768C66A611B160EC372B628054889AA9556D8986'\nSESSION_COOKIE_NAME = 'aisjfdoaisjdfpiasjdfp'\" | sudo tee -a ${PYMIN_LOC}/.env"
+            }
+        }
+        stage('Reload Apache') {
+            steps {
+                sh label: 'Reloading Apache...', script: 'sudo systemctl reload apache2'
+                echo 'DONE'
+            }
+        }
+    }
+}
