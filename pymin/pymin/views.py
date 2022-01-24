@@ -37,15 +37,15 @@ def login():
     if request.method == 'POST':
         username = request.form['username']
         pw = request.form['pw']
-        remember = request.form['remember']
+        try:
+            remember = request.form['remember']
+        except:
+            remember = False
         user = User.query.filter_by(username=username).first()
         if user is None or not user.check_password(pw):
             flash('Invalid username or password')
             return redirect(url_for('views.login'))
-        if remember:
-            login_user(user, remember=remember)
-        else:
-            login_user(user, remember=False)
+        login_user(user, remember=remember)
         next_page = request.args.get('next')
         if not next_page or urlparse(next_page).netloc != '':
             next_page = url_for('views.index')
